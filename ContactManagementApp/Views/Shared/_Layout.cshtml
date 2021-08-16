@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Management</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Mark S. Paris</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document).on("dblclick", $('.searchData > td > div.display'), function (obj) {
+                var target = obj.target;
+                var tr = $(target).closest('tr');
+                Edit(tr);
+            });
+        });
+
+        function Search() {
+
+            var searchTerm = $('#searchTxt').val();
+            //alert(searchTerm);
+
+            $.ajax({
+                url: '/Home/Search/?searchTerm=' + searchTerm,
+                cache: false,
+                type: 'POST',
+                contentType: "application/json",
+                success: function (data) {
+                    UpdateData(data);
+                },
+                dataType: "json",
+                error: function (errObj) {
+                    alert("An error occurred attempting to search your data. Please try again."); //errObj.result);
+                }
+            });
+        }
+
+        function Clear() {
+
+            $.ajax({
+                url: '/Home/Clear',
+                cache: false,
+                type: 'POST',
+                contentType: "application/json",
+                success: function (data) {
+                    UpdateData(data);
+                },
+                dataType: "json",
+                error: function (errObj) {
+                    alert("An error occurred attempting to search your data. Please try again."); //errObj.result);
+                }
+            });
+        }
+
+        function UpdateData(data) {
+            $('.searchData').remove();
+
+            var tableObj = $('#tbl');
+
+            $(data).each(function () {
+
+                var tr = $('<tr>').addClass('searchData').addClass('col-md-12');
+
+                var tdObj = $('<td>', {
+                    class: 'col-md-1'
+                });
+                var divObj = $('<div>', {
+                    class: 'display',
+                    html: this.FirstName
+                });
+                $(tdObj).append(divObj);
+
+                var divEditObj = $('<div>', {
+                    class: 'edit',
+                    html: '<input name="i.FirstName" class="text-box single-line" id="i_FirstName" type="text" value="' + this.FirstName + '" data-val-required="The FirstName field is required." data-val="true">'
+                });
+                $(tdObj).append(divEditObj);
+                $(tr).append(tdObj);
+
+                var tdObj1 = $('<td>', {
+                    class: 'col-md-1'
+                });
+                var divObj1 = $('<div>', {
+                    class: 'display',
+                    html: this.LastName
+                });
+                $(tdObj1).append(divObj1);
+
+                var divEditObj1 = $('<div>', {
+                    class: 'edit',
+                    html: '<input name="i.LastName" class="text-box single-line" id="i_LastName" type="text" value="' + this.LastName + '" data-val-required="The LastName field is required." data-val="true">'
+                });
+                $(tdObj1).append(divEditObj1);
+                $(tr).append(tdObj1);
+
+                //personal
+                var tdObj2 = $('<td>', {
+                    class: 'col-md-3'
+                });
+
+                var divObj2 = $('<div>', {
+                    class: 'display'
+                });
+                var personal = this.EmailAddresses.filter(function (a) {
+                    return a.EmailType == 0;
+                });
+
+                var personalText = "";
+                if ($(personal).length) {
+                    personalText = $(personal)[0].EmailAddressContent;
+                    $(divObj2).html(personalText);
+                }                
+                $(tdObj2).append(divObj2);
+
+                var divEditObj2 = $('<div>', {
+                    class: 'edit'                    
+                });
+                
+                $(divEditObj2).html('<input id="personalEdit" type="text" value="' + personalText + '">');
+                $(tdObj2).append(divEditObj2);
+                $(tr).append(tdObj2);
+
+                //business
+                var tdObj3 = $('<td>', {
+                    class: 'col-md-4'
+                });
+                var divObj3 = $('<div>', {
+                    class: 'display'
+                });
+                var business = this.EmailAddresses.filter(function (a) {
+                    return a.EmailType == 1;
+                });
+
+                var businessText = "";
+                if ($(business).length) {
+                    businessText = $(business)[0].EmailAddressContent;
+                    $(divObj3).html(businessText );
+                }
+                $(tdObj3).append(divObj3);
+
+                var divEditObj3 = $('<div>', {
+                    class: 'edit'
+                });
+                $(divEditObj3).html('<input id="businessEdit" type="text" value="' + businessText + '">');
+
+                $(tdObj3).append(divEditObj3);
+                $(tr).append(tdObj3);
+
+                //buttons
+                var tdObj4 = $('<td>', {
+                    class: 'col-md-3'
+                });
+                var divObj4 = $('<div>', {
+                    class: 'edit'
+                });
+
+                var hiddenInput = $('input', {
+                    type: 'hidden',
+                    id: "objectID",
+                    value: this.ID
+                });
+                divObj4.append(hiddenInput);
+
+                var updateBtn = $('<input>', {
+                    type: "Button",
+                    id: "editBtn",
+                    onclick: "javascript:UpdateRow(this)",
+                    value :  "Update"
+                });
+                divObj4.append(updateBtn);
+                divObj4.append("&nbsp;");
+
+                var cancelBtn = $('<input>', {
+                    type: "Button",
+                    id: "cancelBtn",
+                    onclick: "javascript:CancelUpdate(this)",
+                    value:"Cancel"
+                });
+                divObj4.append(cancelBtn);
+                tdObj4.append(divObj4);
+                $(tr).append(divObj4);
+
+                $(tableObj).append($(tr));
+            });
+
+        }
+
+        function Edit(obj) {
+            $(obj).find('.edit').show();
+            $(obj).find('.display').hide();
+        }
+
+        function CancelUpdate(obj) {
+            var tr = $(obj).closest('tr');
+            $(tr).find('.edit').hide();
+            $(tr).find('.display').show();
+        }
+
+        function UpdateRow(obj) {
+            var tr = $(obj).closest('tr');
+            var objectID = $(tr).find('#objectID').val();
+            var firstName = $(tr).find('#i_FirstName').val();
+            var lastName = $(tr).find('#i_LastName').val();
+            var personalEmail = $(tr).find('#personalEdit').val();
+            var businessEmail = $(tr).find('#businessEdit').val();
+
+            var emailAddresses = [];
+            if (personalEmail.length > 0) {
+                var personalEmailAddressObj = {
+                    EmailType: 0,
+                    EmailAddressContent: personalEmail
+                }
+                emailAddresses.push(personalEmailAddressObj);
+            }
+
+            if (businessEmail.length > 0) {
+                var businessEmailAddressObj = {
+                    EmailType: 1, EmailAddressContent: businessEmail
+                };
+                emailAddresses.push(businessEmailAddressObj);
+            }
+
+            var dataObject = {
+                ID: objectID,
+                FirstName: firstName,
+                LastName: lastName,
+                EmailAddresses: emailAddresses
+            }
+
+            $.ajax({
+                url: '/Home/EditContact',
+                cache: false,
+                data: JSON.stringify(dataObject),
+                type: 'POST',
+                contentType: "application/json",
+                success: function (data) {
+                    alert("You have successfully edited this contact.");
+                    UpdateData(data);
+                    CancelUpdate(obj);
+                },
+                dataType: "json",
+                error: function (errObj) {
+                    alert("An error occurred attempting to create edit this contact. Please try again."); 
+                }
+            });
+            
+        }
+
+    </script>
+
+</body>
+</html>

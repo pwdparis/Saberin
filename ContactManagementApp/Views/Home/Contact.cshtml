@@ -1,0 +1,23 @@
+﻿@using ContactManagementApp.Models
+
+@model Contact
+@{
+    ViewBag.Title = "Contacts";
+}
+<h2>@ViewBag.Title.</h2>
+
+<table>
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+        <th>@Html.DisplayNameFor(model => model.LastName)</th>
+        <th>@Html.DisplayNameFor(model => model.EmailAddress)</th>
+    </tr>
+    @foreach (var i in Model)
+    {
+        <tr>
+            <th>@Html.DisplayFor(model => model.FirstName)</th>
+            <th>@Html.DisplayFor(model => model.LastName)</th>
+            <th>@Html.DisplayFor(model => model.EmailAddress)</th>
+        </tr>
+    }
+</table>

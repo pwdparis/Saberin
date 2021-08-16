@@ -1,0 +1,66 @@
+﻿@using ContactManagementApp.Models
+
+@model List<Person>
+@{
+    ViewBag.Title = "Contacts";
+}
+<h2>@ViewBag.Title.</h2>
+
+<style>
+    .edit {display: none; }
+    .display { display: block; }
+</style>
+
+<div class="container-fluid">
+    <table id="tbl">
+        <tr class="col-md-12">
+            <td class="col-md-12">
+                <div style="width: 100%">
+                    <input type="button"
+                           onclick="window.open('@Url.Action("NewContact", "Home", new { })', '_blank', 'targetWindow', 'menubar=no,scrollbars=yes,resizable=yes, width=600, height=650'); return false;"
+                           value="New Contact" width="100" class="btn btn-default" style="text-align: right;"  />                   
+
+                </div>
+            </td>
+        </tr>
+        <tr class="col-md-12">
+            <td class="col-md-6">Search</td>
+            <td class="col-md-3"><input type="text" id="searchTxt" value="Jake" /></td>
+            <td class="col-md-3"><input type="button" onclick="javascript:Search();" value="Search" class="btn btn-default" width="75" />&nbsp;<input type="button" value="Clear" width="75" class="btn btn-default" onclick="javascript:Clear();" /></td>
+        </tr>
+        <tr class="col-md-12">
+            <th class="col-md-1">@Html.DisplayNameFor(model => model.First().FirstName)</th>
+            <th class="col-md-1">@Html.DisplayNameFor(model => model.First().LastName)</th>
+            <th class="col-md-3">Personal</th>
+            <th class="col-md-4">Business</th>
+            <th class="col-md-3">&nbsp;</th>
+        </tr>
+        @foreach (var i in Model)
+        {
+            var personal = i.EmailAddresses.Where(k => k.EmailType == EmailAddress.EmailAddressType.Personal).Select(a => a.EmailAddressContent).FirstOrDefault();
+            var business = i.EmailAddresses.Where(k => k.EmailType == EmailAddress.EmailAddressType.Business).Select(a => a.EmailAddressContent).FirstOrDefault();
+
+
+        <tr class="col-md-12 searchData">
+            <td class="col-md-1">
+                <div class="display">@Html.DisplayFor(item => i.FirstName)</div>
+                <div class="edit">@Html.EditorFor(item => i.FirstName)</div>
+            </td>
+            <td class="col-md-1">
+                <div class="display">@Html.DisplayFor(item => i.LastName)</div>
+                <div class="edit">@Html.EditorFor(item => i.LastName)</div>
+            </td>
+            <td class="col-md-3"><div class="display">@personal</div><div class="edit"><input type="text" id="personalEdit" value="@personal"/></div></td>
+            <td class="col-md-4"><div class="display">@business</div><div class="edit"><input type="text" id="businessEdit" value="@business"/></div></td>
+
+            <td class="col-md-3">
+                <div class="edit">
+                    <input type= "hidden" id="objectID"value="@Html.DisplayFor(item => i.ID)" />
+                    <input type="Button" id="editBtn" onclick="javascript:UpdateRow(this)" value="Update" />&nbsp;
+                    <input type="Button" id="cancelBtn" onclick="javascript:CancelUpdate(this)" value="Cancel" />
+                </div>
+            </td>
+        </tr>
+        }
+    </table>
+</div>
